@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        class LogEntry {
+            constructor(level,message,metadata={}){
+                this.timestamp= new Date();
+                this.level= level;
+                this.message=message;
+                this.metadata=metadata;
+            }
+        }
+        class EventLogger {
+            constructor(){
+                this.logs=[];
+            }
+            log(level,message,metadata={}){
+                const entry= new LogEntry(level,message,metadata);
+                this.logs.push(entry);
+                console.log(`[${entry.timestamp.toISOString()}] [ ${level}] ${message}`);
+
+
+            }
+
+            getLogs({level= null, fromTime= null, toTime= null,keyword=null} ={}){
+                return this.logs.filter(log=>{
+                    if(level && log.level !==level) return false;
+                    if(fromTime && log.timestamp < new Date(fromTime)) return false;
+                    if(toTime && log.timestamp > new Date(toTime)) return false;
+                    if(keyword && !log.message.includes(keyword)) return false;
+                    return true;
+                })
+
+            }
+
+        }
+        const logger= new EventLogger();
+        logger.log("INFO","Server started");
+        logger.log("Error","DataBase Connection failed",{db:"mongodb"});
+        logger.log("DEBUG","Received requiest",{url:"/api/user"});
+
+        setTimeout(() =>{
+            const recentErrors= logger.getLogs({level:"Error"});
+            console.log("Retrieved  Errors: ",recentErrors);
+
+        },1000);
+
+    </script>
+</head>
+<body>
+    
+</body>
+</html>
